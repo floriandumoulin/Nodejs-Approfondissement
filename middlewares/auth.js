@@ -20,9 +20,4 @@ module.exports = async (req, res, next) => {
     next(new UnauthorizedError(message));
   }
 };
-
-
-const UnauthorizedError = require("../errors/unauthorized");
-const jwt = require("jsonwebtoken");
-const config = require("../config");
  

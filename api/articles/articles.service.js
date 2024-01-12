@@ -9,6 +9,10 @@ class ArticleService {
     return Article.findById(id);
   }
 
+  getArticlesByUserId(userId) {
+    return Article.find({ user: userId }).populate('user', '-password');
+  }
+
   create(data) {
     const article = new Article(data);
     return article.save();

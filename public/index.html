@@ -44,10 +44,32 @@
               <td>{{ user._id }}</td>
               <td>{{ user.name }}</td>
               <td>{{ user.email }}</td>
-              <td><button @click="remove(user._id)">Supprimer</button></td>
+              <td>
+                <button @click="remove(user._id)">Supprimer</button>
+                <button @click="loadUserArticles(user._id)">Voir Articles</button>
+              </td>
             </tr>
           </tbody>
         </table>
+        <article>
+          <h1>Articles de l'utilisateur sélectionné</h1>
+          <table>
+              <thead>
+                  <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Title</th>
+                      <th scope="col">Content</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr v-for="article in userArticles">
+                      <td>{{ article._id }}</td>
+                      <td>{{ article.title }}</td>
+                      <td>{{ article.content }}</td>
+                  </tr>
+              </tbody>
+          </table>
+      </article>
       </article>
     </main>
   </body>
@@ -65,7 +87,8 @@ createApp({
       password: '',
       users: [],
       newUser: {},
-      userToken: ''
+      userToken: '',
+      userArticles: []
     }
   },
   mounted() {
@@ -113,7 +136,11 @@ createApp({
             'x-access-token': this.userToken
           }
       }).then(res => res.data)
-    }
+    },
+    async loadUserArticles(userId) {
+      const articles = await axios.get(`/api/users/${userId}/articles`).then(res => res.data);
+      this.userArticles = articles;
+  },
   }
 }).mount('#app')
 </script>
