@@ -26,7 +26,13 @@ class ArticlesController {
 
   async create(req, res, next) {
     try {
-      const article = await ArticleService.create(req.body);
+      const articleData = {
+        ...req.body,
+        user: req.user._id
+      };
+
+      const article = await ArticleService.create(articleData);
+      
       req.io.emit("article:create", article);
       res.status(201).json(article);
     } catch (err) {
@@ -36,6 +42,11 @@ class ArticlesController {
 
   async update(req, res, next) {
     try {
+
+      if (req.user.role !== 'admin') {
+        throw new UnauthorizedError('Seuls les administrateurs peuvent effectuer cette action.');
+      }
+
       const id = req.params.id;
       const data = req.body;
       const updatedArticle = await ArticleService.update(id, data);
@@ -51,6 +62,11 @@ class ArticlesController {
 
   async delete(req, res, next) {
     try {
+
+      if (req.user.role !== 'admin') {
+        throw new UnauthorizedError('Seuls les administrateurs peuvent effectuer cette action.');
+      }
+
       const id = req.params.id;
       await ArticleService.delete(id);
       req.io.emit("article:delete", { id });
