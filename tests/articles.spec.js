@@ -1,7 +1,20 @@
 const supertest = require('supertest');
-const mockingoose = require('mockingoose');
+const mongoose = require("mongoose");
+const mockingoose = require("mockingoose");
 const { app } = require("../server");
 const Article = require('../api/articles/articles.schema');
+const jwt = require("jsonwebtoken");
+const config = require("../config");
+
+function generateTestToken() {
+  const testUser = {
+    _id: "userId",
+    name: "Test User",
+    role: "admin"
+  };
+
+  return jwt.sign(testUser, config.secretJwtToken);
+}
 
 describe('Articles API', () => {
 
@@ -23,8 +36,11 @@ describe('Articles API', () => {
     const articleId = 'some-article-id';
     mockingoose(Article).toReturn(mockArticle, 'findOneAndUpdate');
 
+    const testToken = generateTestToken();
+
     const response = await supertest(app)
       .put(`/api/articles/${articleId}`)
+      .set('x-access-token', testToken)
       .send(mockArticle);
 
     expect(response.statusCode).toBe(200);
@@ -36,8 +52,12 @@ describe('Articles API', () => {
     const articleId = 'some-article-id';
     mockingoose(Article).toReturn(null, 'findOneAndDelete');
 
+    const testToken = generateTestToken();
+
     const response = await supertest(app)
-      .delete(`/api/articles/${articleId}`);
+      .delete(`/api/articles/${articleId}`)
+      .set('x-access-token', testToken)
+      .send();
 
     expect(response.statusCode).toBe(204);
   });
